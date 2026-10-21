@@ -1,0 +1,31 @@
+name: Update Last Seen Timestamp
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Update timestamp in JSON
+        run: |
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > timestamp.txt
+          # Using a node script or python to update status.json cleanly
+          node -e '
+            const fs = require("fs");
+            const time = new Date().toISOString();
+            fs.writeFileSync("status.json", JSON.stringify({ status: "online", last_seen: time }, null, 2));
+          '
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add status.json
+          git commit -m "Auto-update last seen status [skip ci]" || exit 0
+          git push
