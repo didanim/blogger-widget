@@ -11,7 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Poppins:wght@300;400;600;700&family=Pacifico&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-       body{font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #1a0b2e 0%, #2b1055 50%, #4c1c5c 100%); min-height: 100vh; overflow-x: hidden; color: #fff;}
+body{font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #1a0b2e 0%, #2b1055 50%, #4c1c5c 100%); min-height: 100vh; overflow-x: hidden; color: #fff;}
+::-webkit-scrollbar{width: 3px; height: 3px;}
+::-webkit-scrollbar-track{background: transparent; border-radius: 10px;}
+::-webkit-scrollbar-thumb{background: transparent; border-radius: 10px; transition: background 0.3s;}
+h1{line-height: 1.9;}
 .font-handwriting{font-family: 'Caveat', cursive;}
 .font-title{font-family: 'Pacifico', cursive;}
 #bg-canvas{position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;}
@@ -458,7 +462,6 @@ to{transform: rotate(360deg);}
         }
 
 
-        // --- 4. POLAROID PHOTO CAROUSEL / STACK LOGIC ---
         function renderPolaroids() {
             const container = document.getElementById('polaroid-stack');
             container.innerHTML = '';
@@ -478,7 +481,6 @@ to{transform: rotate(360deg);}
                     </div>
                 `;
 
-                // Add swipe touch events for mobile
                 setupSwipe(card);
 
                 container.appendChild(card);
@@ -520,7 +522,6 @@ to{transform: rotate(360deg);}
                 }
             });
 
-            // Update Counter Text
             document.getElementById('photo-counter').innerText = `${currentPhotoIndex + 1} / ${photos.length}`;
         }
 
@@ -546,14 +547,16 @@ to{transform: rotate(360deg);}
         }
 
         // Touch & Swipe gesture handling for cards
-        function setupSwipe(card) {
+       function setupSwipe(card) {
             let startX = 0;
             let currentX = 0;
             let isDragging = false;
 
+            // --- TOUCH EVENTS (Mobile) ---
             card.addEventListener('touchstart', (e) => {
                 startX = e.touches[0].clientX;
                 isDragging = true;
+                card.classList.add('dragging');
             });
 
             card.addEventListener('touchmove', (e) => {
@@ -563,9 +566,10 @@ to{transform: rotate(360deg);}
                 card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
             });
 
-            card.addEventListener('touchend', (e) => {
+            card.addEventListener('touchend', () => {
                 if (!isDragging) return;
                 isDragging = false;
+                card.classList.remove('dragging');
                 const diffX = currentX - startX;
 
                 if (diffX < -60) {
@@ -575,6 +579,42 @@ to{transform: rotate(360deg);}
                 } else {
                     updatePolaroidStack();
                 }
+                startX = 0;
+                currentX = 0;
+            });
+
+            // --- MOUSE EVENTS (Desktop Dragging & Swiping) ---
+            card.addEventListener('mousedown', (e) => {
+                // Prevent text highlight/default image drag behavior
+                e.preventDefault();
+                startX = e.clientX;
+                currentX = e.clientX;
+                isDragging = true;
+                card.classList.add('dragging');
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                currentX = e.clientX;
+                const diffX = currentX - startX;
+                card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                card.classList.remove('dragging');
+                const diffX = currentX - startX;
+
+                if (diffX < -60) {
+                    nextPhoto();
+                } else if (diffX > 60) {
+                    prevPhoto();
+                } else {
+                    updatePolaroidStack();
+                }
+                startX = 0;
+                currentX = 0;
             });
         }
 
@@ -685,10 +725,20 @@ to{transform: rotate(360deg);}
         }
 
 
-        // Initialize App on Window Load
-        window.onload = function() {
+window.onload = function() {
             initBgCanvas();
             renderPolaroids();
+
+            window.addEventListener('keydown', (e) => {
+                const photoScreen = document.getElementById('photo-screen');
+                if (photoScreen && !photoScreen.classList.contains('hidden')) {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                        nextPhoto();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                        prevPhoto();
+                    }
+                }
+            });
         };
     </script>
 </body>
