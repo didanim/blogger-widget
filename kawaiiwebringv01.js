@@ -1,5 +1,4 @@
 (function () {
-  // Load Iconify Script if not present
   if (!window.iconifyLoaded && !document.getElementById('iconify-script')) {
     var iconifyScript = document.createElement('script');
     iconifyScript.id = 'iconify-script';
@@ -8,32 +7,29 @@
     window.iconifyLoaded = true;
   }
 
-  // Get current executing script tag reliably
   var currentScript = document.currentScript || (function() {
     var scripts = document.getElementsByTagName('script');
     return scripts[scripts.length - 1];
   })();
 
-  // Extract attributes safely with fallbacks
   var name = currentScript.getAttribute('name') || 'Anonymous';
   var avatar = currentScript.getAttribute('avatarImage') || 'https://via.placeholder.com/80/f8a5c2/ffffff?text=♥';
   var bio = currentScript.getAttribute('bio') || 'Welcome to my cozy blog corner!';
   var bloglink = currentScript.getAttribute('bloglink') || '#';
   var niche = currentScript.getAttribute('niche') || 'Personal Blog';
+  var likes = currentScript.getAttribute('likes') || 'Cats, Coffee, Pixel Art';
+  var dislikes = currentScript.getAttribute('dislikes') || 'Spam, Rainy Days';
   var textFont = currentScript.getAttribute('textFont') || "'Palatino Linotype', 'Book Antiqua', Palatino, serif";
-  var textSize = currentScript.getAttribute('textSize') || '14';
+  var textSize = currentScript.getAttribute('textSize') || '13';
   var cardColor = currentScript.getAttribute('cardColor') || '#fff0f5';
   var accentColor = currentScript.getAttribute('accentColor') || '#ff6b81';
   var sparkles = currentScript.getAttribute('sparkles') === 'true';
 
-  // URL to raw webring directory JSON on GitHub
   var WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webring.json';
   var widgetId = 'kw-ring-' + Math.floor(Math.random() * 100000);
 
-  // Clean domain display string
   var displayLink = bloglink.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
-  // Inject Styles
   var css = `
     .` + widgetId + `-container { width: 100% !important; max-width: 320px !important; margin: 15px auto !important; font-family: ` + textFont + ` !important; font-size: ` + textSize + `px !important; color: #2d3436 !important; box-sizing: border-box !important; }
     .` + widgetId + `-perspective { perspective: 1000px !important; height: 260px !important; width: 100% !important; }
@@ -50,16 +46,19 @@
     .` + widgetId + `-s4 { bottom: 18% !important; right: 12% !important; animation-delay: 2.1s !important; font-size: 14px !important; }
 
     .` + widgetId + `-top-row { display: flex !important; gap: 12px !important; align-items: center !important; z-index: 2 !important; }
-    .` + widgetId + `-avatar { width: 60px !important; height: 60px !important; border-radius: 50% !important; object-fit: cover !important; border: 3px solid #ffffff !important; box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important; flex-shrink: 0 !important; }
+    .` + widgetId + `-avatar { width: 55px !important; height: 55px !important; border-radius: 50% !important; object-fit: cover !important; border: 3px solid #ffffff !important; box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important; flex-shrink: 0 !important; }
     .` + widgetId + `-header-info { flex-grow: 1 !important; overflow: hidden !important; }
     .` + widgetId + `-name { font-weight: bold !important; font-size: 1.05em !important; color: ` + accentColor + ` !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 0 2px 0 !important; }
     .` + widgetId + `-niche { display: inline-block !important; background: #ffffff !important; padding: 2px 8px !important; border-radius: 10px !important; font-size: 0.78em !important; color: #636e72 !important; border: 1px solid #dfe6e9 !important; }
-    .` + widgetId + `-bio { margin: 6px 0 !important; font-size: 0.85em !important; line-height: 1.3 !important; color: #4a4a4a !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; z-index: 2 !important; }
+    .` + widgetId + `-bio { margin: 4px 0 !important; font-size: 0.85em !important; line-height: 1.25 !important; color: #4a4a4a !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; z-index: 2 !important; }
+    
+    /* Likes and Dislikes Section */
+    .` + widgetId + `-likes-dislikes { display: flex !important; flex-direction: column !important; gap: 3px !important; background: rgba(255, 255, 255, 0.7) !important; border-radius: 8px !important; padding: 5px 8px !important; margin: 2px 0 !important; font-size: 0.78em !important; z-index: 2 !important; border: 1px solid rgba(0,0,0,0.04) !important; }
+    .` + widgetId + `-item { display: flex !important; align-items: center !important; gap: 5px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+    .` + widgetId + `-item-text { overflow: hidden !important; text-overflow: ellipsis !important; color: #2d3436 !important; }
+
     .` + widgetId + `-bloglink { display: flex !important; align-items: center !important; gap: 4px !important; font-size: 0.82em !important; color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; word-break: break-all !important; z-index: 2 !important; }
-    .` + widgetId + `-nav-controls { display: flex !important; justify-content: space-between !important; align-items: center !important; background: rgba(255, 255, 255, 0.75) !important; border-radius: 12px !important; padding: 4px 8px !important; margin-top: 4px !important; border: 1px solid rgba(0,0,0,0.05) !important; z-index: 2 !important; }
-    .` + widgetId + `-nav-btn { display: inline-flex !important; align-items: center !important; gap: 4px !important; color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; font-size: 0.8em !important; padding: 2px 6px !important; border-radius: 6px !important; transition: background 0.2s !important; }
-    .` + widgetId + `-nav-btn:hover { background: ` + accentColor + ` !important; color: #ffffff !important; }
-    .` + widgetId + `-credit { text-align: center !important; font-size: 0.75em !important; color: #7f8c8d !important; border-top: 1px dashed rgba(0,0,0,0.1) !important; padding-top: 4px !important; margin-top: 4px !important; z-index: 2 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 3px !important; }
+    .` + widgetId + `-credit { text-align: center !important; font-size: 0.75em !important; color: #7f8c8d !important; border-top: 1px dashed rgba(0,0,0,0.1) !important; padding-top: 4px !important; margin-top: 2px !important; z-index: 2 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 3px !important; }
     .` + widgetId + `-credit a { color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; }
     
     .` + widgetId + `-back { transform: rotateY(180deg) !important; padding: 10px !important; }
@@ -81,7 +80,6 @@
   }
   document.getElementsByTagName('head')[0].appendChild(style);
 
-  // Iconify Sparkles Overlay
   var sparkleHTML = sparkles ? `
     <div class="` + widgetId + `-sparkles">
       <span class="` + widgetId + `-sparkle ` + widgetId + `-s1"><span class="iconify" data-icon="lucide:sparkles"></span></span>
@@ -91,7 +89,6 @@
     </div>
   ` : '';
 
-  // Container HTML with Iconify Icons
   var container = document.createElement('div');
   container.className = widgetId + '-container';
   container.innerHTML = `
@@ -109,24 +106,25 @@
             </div>
           </div>
           <div class="` + widgetId + `-bio">` + bio + `</div>
+          
+          <!-- LIKES AND DISLIKES SECTION -->
+          <div class="` + widgetId + `-likes-dislikes">
+            <div class="` + widgetId + `-item">
+              <span class="iconify" data-icon="lucide:thumbs-up" style="color:` + accentColor + `; flex-shrink: 0;"></span>
+              <span class="` + widgetId + `-item-text"><b>Likes:</b> ` + likes + `</span>
+            </div>
+            <div class="` + widgetId + `-item">
+              <span class="iconify" data-icon="lucide:thumbs-down" style="color:#e74c3c; flex-shrink: 0;"></span>
+              <span class="` + widgetId + `-item-text"><b>Dislikes:</b> ` + dislikes + `</span>
+            </div>
+          </div>
+
           <a class="` + widgetId + `-bloglink" href="` + bloglink + `" target="_blank" rel="nofollow noopener noreferrer">
             <span class="iconify" data-icon="lucide:globe" data-inline="true"></span> ` + displayLink + `
           </a>
-          
-          <div class="` + widgetId + `-nav-controls">
-            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-prev" href="#" target="_blank" rel="nofollow noopener noreferrer">
-              <span class="iconify" data-icon="lucide:chevron-left"></span> Prev
-            </a>
-            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-rand" href="#" target="_blank" rel="nofollow noopener noreferrer">
-              <span class="iconify" data-icon="lucide:dices"></span> Random
-            </a>
-            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-next" href="#" target="_blank" rel="nofollow noopener noreferrer">
-              Next <span class="iconify" data-icon="lucide:chevron-right"></span>
-            </a>
-          </div>
 
           <div class="` + widgetId + `-credit">
-            Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> <span class="iconify" data-icon="lucide:heart" style="color:` + accentColor + `;"></span>
+            Made by <a href="https://writewhim.blogspot.com" target="_blank" rel="nofollow noopener noreferrer">Dida</a> <span class="iconify" data-icon="lucide:heart" style="color:` + accentColor + `;"></span>
           </div>
         </div>
 
@@ -150,14 +148,14 @@
             </table>
           </div>
           <div class="` + widgetId + `-credit">
-            Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> <span class="iconify" data-icon="lucide:heart" style="color:` + accentColor + `;"></span>
+            Made by <a href="https://writewhim.blogspot.com" target="_blank" rel="nofollow noopener noreferrer">Dida</a> <span class="iconify" data-icon="lucide:heart" style="color:` + accentColor + `;"></span>
           </div>
         </div>
 
       </div>
     </div>
     <div class="` + widgetId + `-instruction" id="` + widgetId + `-flip-btn">
-      <span class="iconify" data-icon="lucide:refresh-cw"></span> Click to flip card & view members list
+      <span class="iconify" data-icon="lucide:refresh-cw"></span> View members list
     </div>
   `;
 
@@ -172,14 +170,13 @@
     isFlipped = !isFlipped;
     if (isFlipped) {
       cardElement.className = widgetId + '-card flipped';
-      flipBtn.innerHTML = '<span class="iconify" data-icon="lucide:refresh-cw"></span> Click to flip back to Profile ID';
+      flipBtn.innerHTML = '<span class="iconify" data-icon="lucide:refresh-cw"></span> Back to Profile ID';
     } else {
       cardElement.className = widgetId + '-card';
-      flipBtn.innerHTML = '<span class="iconify" data-icon="lucide:refresh-cw"></span> Click to flip card & view members list';
+      flipBtn.innerHTML = '<span class="iconify" data-icon="lucide:refresh-cw"></span> View members list';
     }
   });
 
-  // Fetch Member Directory
   fetch(WEBRING_JSON_URL)
     .then(function(res) { return res.json(); })
     .then(function(data) {
@@ -192,21 +189,6 @@
           tr.innerHTML = '<td><a href="' + item.url + '" target="_blank" rel="nofollow noopener noreferrer">' + item.name + '</a></td><td>' + item.niche + '</td>';
           tbody.appendChild(tr);
         });
-
-        var currentCleanUrl = bloglink.replace(/\/$/, '').toLowerCase();
-        var currentIndex = data.findIndex(function(item) { return item.url.replace(/\/$/, '').toLowerCase() === currentCleanUrl; });
-        if (currentIndex === -1) currentIndex = 0;
-
-        var prevIndex = (currentIndex - 1 + data.length) % data.length;
-        var nextIndex = (currentIndex + 1) % data.length;
-        var randIndex = Math.floor(Math.random() * data.length);
-        if (data.length > 1 && randIndex === currentIndex) {
-          randIndex = (currentIndex + 1) % data.length;
-        }
-
-        document.getElementById(widgetId + '-prev').href = data[prevIndex].url;
-        document.getElementById(widgetId + '-next').href = data[nextIndex].url;
-        document.getElementById(widgetId + '-rand').href = data[randIndex].url;
       } else {
         tbody.innerHTML = '<tr><td colspan="2">No members found.</td></tr>';
       }
