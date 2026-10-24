@@ -32,7 +32,7 @@
   var accentColor = currentScript.getAttribute('accentColor') || '#ff6b81';
   var sparkles = currentScript.getAttribute('sparkles') === 'true';
 
-  var WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webring.json';
+  var WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webRing.json';
   var widgetId = 'kw-ring-' + Math.floor(Math.random() * 100000);
 
   var displayLink = bloglink.replace(/^https?:\/\//, '').replace(/\/$/, '');
