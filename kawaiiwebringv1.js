@@ -1,5 +1,5 @@
 (function () {
-  // Find current script tag to read user parameters
+  // Read script attributes
   const scripts = document.getElementsByTagName('script');
   const currentScript = scripts[scripts.length - 1];
 
@@ -11,14 +11,13 @@
   const niche = currentScript.getAttribute('niche') || 'Personal Blog';
   const textFont = currentScript.getAttribute('textFont') || "'Palatino Linotype', 'Book Antiqua', Palatino, serif";
   const textSize = currentScript.getAttribute('textSize') || '14';
-  const primaryColor = currentScript.getAttribute('cardColor') || '#ffeaa7'; // Customizable background
-  const accentColor = currentScript.getAttribute('accentColor') || '#ff7675'; // Cute pastel accent
-  const sparkles = currentScript.getAttribute('sparkles') === 'true'; // Sparkle overlay option
+  const cardColor = currentScript.getAttribute('cardColor') || '#fff0f5'; // Light pastel pink
+  const accentColor = currentScript.getAttribute('accentColor') || '#ff6b81'; // Cute vibrant accent
+  const sparkles = currentScript.getAttribute('sparkles') === 'true'; // Sparkle toggle
 
   // URL to raw webring directory JSON on GitHub
   const WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webring.json';
 
-  // Create unique widget container ID
   const widgetId = 'kawaii-webring-' + Math.floor(Math.random() * 100000);
 
   // Inject Styles dynamically
@@ -35,7 +34,7 @@
     }
     .#${widgetId}-perspective {
       perspective: 1000px;
-      height: 220px;
+      height: 250px;
       width: 100%;
     }
     .#${widgetId}-card {
@@ -45,7 +44,7 @@
       transform-style: preserve-3d;
       transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
       border-radius: 16px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
     }
     .#${widgetId}-card.flipped {
       transform: rotateY(180deg);
@@ -57,7 +56,7 @@
       backface-visibility: hidden;
       border-radius: 16px;
       border: 2px dashed ${accentColor};
-      background-color: ${primaryColor};
+      background-color: ${cardColor};
       box-sizing: border-box;
       padding: 12px;
       overflow: hidden;
@@ -65,20 +64,31 @@
       flex-direction: column;
       justify-content: space-between;
     }
-    ${sparkles ? `
-    .#${widgetId}-face::before {
-      content: '';
+
+    /* Sparkle Particle Animations */
+    @keyframes ${widgetId}-twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
+      50% { opacity: 0.9; transform: scale(1.2) rotate(180deg); }
+    }
+    .#${widgetId}-sparkles {
       position: absolute;
-      top: -10px; left: -10px; right: -10px; bottom: -10px;
-      opacity: 0.15;
-      font-size: 18px;
-      word-spacing: 15px;
-      line-height: 25px;
+      top: 0; left: 0; right: 0; bottom: 0;
       pointer-events: none;
       z-index: 1;
-    }` : ''}
-    
-    /* Front Layout */
+      overflow: hidden;
+    }
+    .#${widgetId}-sparkle {
+      position: absolute;
+      color: ${accentColor};
+      font-size: 12px;
+      animation: ${widgetId}-twinkle 3s infinite ease-in-out;
+    }
+    .#${widgetId}-s1 { top: 10%; left: 8%; animation-delay: 0s; }
+    .#${widgetId}-s2 { top: 15%; right: 10%; animation-delay: 0.7s; font-size: 16px; }
+    .#${widgetId}-s3 { bottom: 25%; left: 12%; animation-delay: 1.4s; font-size: 14px; }
+    .#${widgetId}-s4 { bottom: 15%; right: 12%; animation-delay: 2.1s; }
+
+    /* Front Card Layout */
     .#${widgetId}-top-row {
       display: flex;
       gap: 12px;
@@ -86,11 +96,11 @@
       z-index: 2;
     }
     .#${widgetId}-avatar {
-      width: 70px;
-      height: 70px;
+      width: 65px;
+      height: 65px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #fff;
+      border: 3px solid #ffffff;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       flex-shrink: 0;
     }
@@ -100,7 +110,7 @@
     }
     .#${widgetId}-name {
       font-weight: bold;
-      font-size: 1.1em;
+      font-size: 1.05em;
       color: ${accentColor};
       white-space: nowrap;
       overflow: hidden;
@@ -112,30 +122,57 @@
       background: #ffffff;
       padding: 2px 8px;
       border-radius: 10px;
-      font-size: 0.8em;
+      font-size: 0.78em;
       color: #636e72;
       border: 1px solid #dfe6e9;
     }
     .#${widgetId}-bio {
-      margin: 8px 0;
-      font-size: 0.88em;
+      margin: 6px 0;
+      font-size: 0.85em;
       line-height: 1.3;
       color: #4a4a4a;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       z-index: 2;
     }
     .#${widgetId}-bloglink {
       display: block;
-      font-size: 0.85em;
+      font-size: 0.82em;
       color: ${accentColor};
       text-decoration: none;
       font-weight: bold;
       word-break: break-all;
       z-index: 2;
     }
+
+    /* Webring Quick Navigation Controls */
+    .#${widgetId}-nav-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 12px;
+      padding: 4px 8px;
+      margin-top: 4px;
+      border: 1px solid rgba(0,0,0,0.05);
+      z-index: 2;
+    }
+    .#${widgetId}-nav-btn {
+      color: ${accentColor};
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.8em;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .#${widgetId}-nav-btn:hover {
+      background: ${accentColor};
+      color: #ffffff;
+    }
+
     .#${widgetId}-credit {
       text-align: center;
       font-size: 0.75em;
@@ -151,7 +188,7 @@
       font-weight: bold;
     }
 
-    /* Back Layout (Directory Table) */
+    /* Back Directory Layout */
     .#${widgetId}-back {
       transform: rotateY(180deg);
       padding: 10px;
@@ -161,27 +198,27 @@
       text-align: center;
       margin: 0 0 6px 0;
       color: ${accentColor};
-      font-size: 0.95em;
+      font-size: 0.9em;
     }
     .#${widgetId}-table-wrapper {
       flex: 1;
       overflow-y: auto;
       border: 1px solid rgba(0,0,0,0.08);
       border-radius: 8px;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.85);
     }
     .#${widgetId}-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.82em;
+      font-size: 0.8em;
     }
     .#${widgetId}-table th, .#${widgetId}-table td {
-      padding: 6px 8px;
+      padding: 5px 8px;
       text-align: left;
       border-bottom: 1px solid #f1f2f6;
     }
     .#${widgetId}-table th {
-      background: #f8a5c2;
+      background: ${accentColor};
       color: #fff;
       position: sticky;
       top: 0;
@@ -209,12 +246,22 @@
       transition: transform 0.2s;
     }
     .#${widgetId}-instruction:hover {
-      transform: scale(1.03);
+      transform: scale(1.02);
     }
   `;
   document.head.appendChild(style);
 
-  // Build HTML Structure
+  // Sparkle HTML Template
+  const sparkleHTML = sparkles ? `
+    <div class="${widgetId}-sparkles">
+      <span class="${widgetId}-sparkle ${widgetId}-s1">✦</span>
+      <span class="${widgetId}-sparkle ${widgetId}-s2">✨</span>
+      <span class="${widgetId}-sparkle ${widgetId}-s3">💖</span>
+      <span class="${widgetId}-sparkle ${widgetId}-s4">✦</span>
+    </div>
+  ` : '';
+
+  // Build Container HTML
   const container = document.createElement('div');
   container.className = `${widgetId}-container`;
   container.innerHTML = `
@@ -223,6 +270,7 @@
         
         <!-- FRONT SIDE -->
         <div class="${widgetId}-face">
+          ${sparkleHTML}
           <div class="${widgetId}-top-row">
             <img class="${widgetId}-avatar" src="${avatar}" alt="${name}'s Avatar" />
             <div class="${widgetId}-header-info">
@@ -231,15 +279,24 @@
             </div>
           </div>
           <div class="${widgetId}-bio">${bio}</div>
-          <a class="${widgetId}-bloglink" href="${bloglink}" target="_blank" rel="nofollow noopener noreferrer"> ${bloglink.replace(/^https?:\/\//, '')}</a>
+          <a class="${widgetId}-bloglink" href="${bloglink}" target="_blank" rel="nofollow noopener noreferrer">🌐 ${bloglink.replace(/^https?:\/\//, '')}</a>
+          
+          <!-- Prev / Random / Next Quick Controls -->
+          <div class="${widgetId}-nav-controls">
+            <a class="${widgetId}-nav-btn" id="${widgetId}-prev" href="#" target="_blank" rel="nofollow noopener noreferrer">◀ Prev</a>
+            <a class="${widgetId}-nav-btn" id="${widgetId}-rand" href="#" target="_blank" rel="nofollow noopener noreferrer">🎲 Random</a>
+            <a class="${widgetId}-nav-btn" id="${widgetId}-next" href="#" target="_blank" rel="nofollow noopener noreferrer">Next ▶</a>
+          </div>
+
           <div class="${widgetId}-credit">
-            Made by <a href="https://writewhim.blogspot.com" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
+            Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
           </div>
         </div>
 
-        <!-- BACK SIDE (Webring Table) -->
+        <!-- BACK SIDE (Directory Table) -->
         <div class="${widgetId}-face ${widgetId}-back">
-          <div class="${widgetId}-back-title">🌸 Webring Members Directory</div>
+          ${sparkleHTML}
+          <div class="${widgetId}-back-title">🌸 Webring Directory</div>
           <div class="${widgetId}-table-wrapper">
             <table class="${widgetId}-table">
               <thead>
@@ -253,8 +310,8 @@
               </tbody>
             </table>
           </div>
-          <div class="${widgetId}-credit" style="margin-top:6px;">
-            Made by <a href="https://writewhim.blogspot.com" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
+          <div class="${widgetId}-credit">
+            Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
           </div>
         </div>
 
@@ -283,7 +340,7 @@
     }
   });
 
-  // Fetch Directory JSON dynamically from GitHub
+  // Fetch Member Directory and Bind Prev/Next Logic
   fetch(WEBRING_JSON_URL)
     .then(res => res.json())
     .then(data => {
@@ -291,6 +348,7 @@
       tbody.innerHTML = '';
       
       if (data && data.length > 0) {
+        // Populate Table
         data.forEach(item => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
@@ -299,6 +357,27 @@
           `;
           tbody.appendChild(tr);
         });
+
+        // Determine current site position in index
+        const currentCleanUrl = bloglink.replace(/\/$/, '').toLowerCase();
+        let currentIndex = data.findIndex(item => item.url.replace(/\/$/, '').toLowerCase() === currentCleanUrl);
+        if (currentIndex === -1) currentIndex = 0;
+
+        // Calculate Prev / Next circular indices
+        const prevIndex = (currentIndex - 1 + data.length) % data.length;
+        const nextIndex = (currentIndex + 1) % data.length;
+        
+        // Random Index (excluding current if possible)
+        let randIndex = Math.floor(Math.random() * data.length);
+        if (data.length > 1 && randIndex === currentIndex) {
+          randIndex = (currentIndex + 1) % data.length;
+        }
+
+        // Set Navigation Links
+        document.getElementById(`${widgetId}-prev`).href = data[prevIndex].url;
+        document.getElementById(`${widgetId}-next`).href = data[nextIndex].url;
+        document.getElementById(`${widgetId}-rand`).href = data[randIndex].url;
+
       } else {
         tbody.innerHTML = '<tr><td colspan="2">No members found.</td></tr>';
       }
