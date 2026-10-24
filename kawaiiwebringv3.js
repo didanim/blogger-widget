@@ -1,8 +1,20 @@
 (function () {
-  // Read script attributes
-  var scripts = document.getElementsByTagName('script');
-  var currentScript = scripts[scripts.length - 1];
+  // Load Iconify Script if not present
+  if (!window.iconifyLoaded && !document.getElementById('iconify-script')) {
+    var iconifyScript = document.createElement('script');
+    iconifyScript.id = 'iconify-script';
+    iconifyScript.src = 'https://code.iconify.design/3/3.1.0/iconify.min.js';
+    document.head.appendChild(iconifyScript);
+    window.iconifyLoaded = true;
+  }
 
+  // Get current executing script tag reliably
+  var currentScript = document.currentScript || (function() {
+    var scripts = document.getElementsByTagName('script');
+    return scripts[scripts.length - 1];
+  })();
+
+  // Extract attributes safely with fallbacks
   var name = currentScript.getAttribute('name') || 'Anonymous';
   var avatar = currentScript.getAttribute('avatarImage') || 'https://via.placeholder.com/80/f8a5c2/ffffff?text=♥';
   var bio = currentScript.getAttribute('bio') || 'Welcome to my cozy blog corner!';
@@ -14,10 +26,14 @@
   var accentColor = currentScript.getAttribute('accentColor') || '#ff6b81';
   var sparkles = currentScript.getAttribute('sparkles') === 'true';
 
+  // URL to raw webring directory JSON on GitHub
   var WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webring.json';
   var widgetId = 'kw-ring-' + Math.floor(Math.random() * 100000);
 
-  // Inject CSS Styles
+  // Clean domain display string
+  var displayLink = bloglink.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+  // Inject Styles
   var css = `
     .` + widgetId + `-container { width: 100% !important; max-width: 320px !important; margin: 15px auto !important; font-family: ` + textFont + ` !important; font-size: ` + textSize + `px !important; color: #2d3436 !important; box-sizing: border-box !important; }
     .` + widgetId + `-perspective { perspective: 1000px !important; height: 260px !important; width: 100% !important; }
@@ -27,11 +43,11 @@
     
     @keyframes ` + widgetId + `-twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); } 50% { opacity: 0.9; transform: scale(1.2) rotate(180deg); } }
     .` + widgetId + `-sparkles { position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; pointer-events: none !important; z-index: 1 !important; }
-    .` + widgetId + `-sparkle { position: absolute !important; color: ` + accentColor + ` !important; font-size: 12px !important; animation: ` + widgetId + `-twinkle 3s infinite ease-in-out !important; }
-    .` + widgetId + `-s1 { top: 8% !important; left: 8% !important; animation-delay: 0s !important; }
-    .` + widgetId + `-s2 { top: 12% !important; right: 10% !important; animation-delay: 0.7s !important; font-size: 16px !important; }
-    .` + widgetId + `-s3 { bottom: 25% !important; left: 10% !important; animation-delay: 1.4s !important; font-size: 14px !important; }
-    .` + widgetId + `-s4 { bottom: 18% !important; right: 12% !important; animation-delay: 2.1s !important; }
+    .` + widgetId + `-sparkle { position: absolute !important; color: ` + accentColor + ` !important; animation: ` + widgetId + `-twinkle 3s infinite ease-in-out !important; display: inline-flex !important; }
+    .` + widgetId + `-s1 { top: 8% !important; left: 8% !important; animation-delay: 0s !important; font-size: 14px !important; }
+    .` + widgetId + `-s2 { top: 12% !important; right: 10% !important; animation-delay: 0.7s !important; font-size: 18px !important; }
+    .` + widgetId + `-s3 { bottom: 25% !important; left: 10% !important; animation-delay: 1.4s !important; font-size: 16px !important; }
+    .` + widgetId + `-s4 { bottom: 18% !important; right: 12% !important; animation-delay: 2.1s !important; font-size: 14px !important; }
 
     .` + widgetId + `-top-row { display: flex !important; gap: 12px !important; align-items: center !important; z-index: 2 !important; }
     .` + widgetId + `-avatar { width: 60px !important; height: 60px !important; border-radius: 50% !important; object-fit: cover !important; border: 3px solid #ffffff !important; box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important; flex-shrink: 0 !important; }
@@ -39,21 +55,21 @@
     .` + widgetId + `-name { font-weight: bold !important; font-size: 1.05em !important; color: ` + accentColor + ` !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 0 2px 0 !important; }
     .` + widgetId + `-niche { display: inline-block !important; background: #ffffff !important; padding: 2px 8px !important; border-radius: 10px !important; font-size: 0.78em !important; color: #636e72 !important; border: 1px solid #dfe6e9 !important; }
     .` + widgetId + `-bio { margin: 6px 0 !important; font-size: 0.85em !important; line-height: 1.3 !important; color: #4a4a4a !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; z-index: 2 !important; }
-    .` + widgetId + `-bloglink { display: block !important; font-size: 0.82em !important; color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; word-break: break-all !important; z-index: 2 !important; }
-    .` + widgetId + `-nav-controls { display: flex !important; justify-content: space-between !important; align-items: center !important; background: rgba(255, 255, 255, 0.7) !important; border-radius: 12px !important; padding: 4px 8px !important; margin-top: 4px !important; border: 1px solid rgba(0,0,0,0.05) !important; z-index: 2 !important; }
-    .` + widgetId + `-nav-btn { color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; font-size: 0.8em !important; padding: 2px 6px !important; border-radius: 6px !important; }
+    .` + widgetId + `-bloglink { display: flex !important; align-items: center !important; gap: 4px !important; font-size: 0.82em !important; color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; word-break: break-all !important; z-index: 2 !important; }
+    .` + widgetId + `-nav-controls { display: flex !important; justify-content: space-between !important; align-items: center !important; background: rgba(255, 255, 255, 0.75) !important; border-radius: 12px !important; padding: 4px 8px !important; margin-top: 4px !important; border: 1px solid rgba(0,0,0,0.05) !important; z-index: 2 !important; }
+    .` + widgetId + `-nav-btn { display: inline-flex !important; align-items: center !important; gap: 4px !important; color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; font-size: 0.8em !important; padding: 2px 6px !important; border-radius: 6px !important; transition: background 0.2s !important; }
     .` + widgetId + `-nav-btn:hover { background: ` + accentColor + ` !important; color: #ffffff !important; }
-    .` + widgetId + `-credit { text-align: center !important; font-size: 0.75em !important; color: #7f8c8d !important; border-top: 1px dashed rgba(0,0,0,0.1) !important; padding-top: 4px !important; margin-top: 4px !important; z-index: 2 !important; }
+    .` + widgetId + `-credit { text-align: center !important; font-size: 0.75em !important; color: #7f8c8d !important; border-top: 1px dashed rgba(0,0,0,0.1) !important; padding-top: 4px !important; margin-top: 4px !important; z-index: 2 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 3px !important; }
     .` + widgetId + `-credit a { color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; }
     
     .` + widgetId + `-back { transform: rotateY(180deg) !important; padding: 10px !important; }
-    .` + widgetId + `-back-title { font-weight: bold !important; text-align: center !important; margin: 0 0 6px 0 !important; color: ` + accentColor + ` !important; font-size: 0.9em !important; }
+    .` + widgetId + `-back-title { font-weight: bold !important; text-align: center !important; margin: 0 0 6px 0 !important; color: ` + accentColor + ` !important; font-size: 0.9em !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 5px !important; }
     .` + widgetId + `-table-wrapper { flex: 1 !important; overflow-y: auto !important; border: 1px solid rgba(0,0,0,0.08) !important; border-radius: 8px !important; background: rgba(255,255,255,0.85) !important; }
     .` + widgetId + `-table { width: 100% !important; border-collapse: collapse !important; font-size: 0.8em !important; margin: 0 !important; }
     .` + widgetId + `-table th, .` + widgetId + `-table td { padding: 5px 8px !important; text-align: left !important; border-bottom: 1px solid #f1f2f6 !important; }
     .` + widgetId + `-table th { background: ` + accentColor + ` !important; color: #fff !important; position: sticky !important; top: 0 !important; z-index: 2 !important; }
     .` + widgetId + `-table a { color: #2d3436 !important; text-decoration: none !important; font-weight: bold !important; }
-    .` + widgetId + `-instruction { text-align: center !important; margin-top: 8px !important; font-size: 0.8em !important; color: ` + accentColor + ` !important; cursor: pointer !important; user-select: none !important; font-weight: bold !important; }
+    .` + widgetId + `-instruction { text-align: center !important; margin-top: 8px !important; font-size: 0.8em !important; color: ` + accentColor + ` !important; cursor: pointer !important; user-select: none !important; font-weight: bold !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 4px !important; }
   `;
 
   var style = document.createElement('style');
@@ -65,14 +81,24 @@
   }
   document.getElementsByTagName('head')[0].appendChild(style);
 
-  var sparkleHTML = sparkles ? '<div class="' + widgetId + '-sparkles"><span class="' + widgetId + '-sparkle ' + widgetId + '-s1">✦</span><span class="' + widgetId + '-sparkle ' + widgetId + '-s2">✨</span><span class="' + widgetId + '-sparkle ' + widgetId + '-s3">💖</span><span class="' + widgetId + '-sparkle ' + widgetId + '-s4">✦</span></div>' : '';
+  // Iconify Sparkles Overlay
+  var sparkleHTML = sparkles ? `
+    <div class="` + widgetId + `-sparkles">
+      <span class="` + widgetId + `-sparkle ` + widgetId + `-s1"><span class="iconify" data-icon="lucide:sparkles"></span></span>
+      <span class="` + widgetId + `-sparkle ` + widgetId + `-s2"><span class="iconify" data-icon="solar:stars-minimalistic-bold-duotone"></span></span>
+      <span class="` + widgetId + `-sparkle ` + widgetId + `-s3"><span class="iconify" data-icon="lucide:heart"></span></span>
+      <span class="` + widgetId + `-sparkle ` + widgetId + `-s4"><span class="iconify" data-icon="lucide:sparkle"></span></span>
+    </div>
+  ` : '';
 
+  // Container HTML with Iconify Icons
   var container = document.createElement('div');
   container.className = widgetId + '-container';
   container.innerHTML = `
     <div class="` + widgetId + `-perspective">
       <div class="` + widgetId + `-card" id="` + widgetId + `-card">
         
+        <!-- FRONT CARD FACE -->
         <div class="` + widgetId + `-face">
           ` + sparkleHTML + `
           <div class="` + widgetId + `-top-row">
@@ -83,22 +109,33 @@
             </div>
           </div>
           <div class="` + widgetId + `-bio">` + bio + `</div>
-          <a class="` + widgetId + `-bloglink" href="` + bloglink + `" target="_blank" rel="nofollow noopener noreferrer">🌐 ` + bloglink.replace(/^https?:\/\//, '') + `</a>
+          <a class="` + widgetId + `-bloglink" href="` + bloglink + `" target="_blank" rel="nofollow noopener noreferrer">
+            <span class="iconify" data-icon="lucide:globe" data-inline="true"></span> ` + displayLink + `
+          </a>
           
           <div class="` + widgetId + `-nav-controls">
-            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-prev" href="#" target="_blank" rel="nofollow noopener noreferrer">◀ Prev</a>
-            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-rand" href="#" target="_blank" rel="nofollow noopener noreferrer">🎲 Random</a>
-            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-next" href="#" target="_blank" rel="nofollow noopener noreferrer">Next ▶</a>
+            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-prev" href="#" target="_blank" rel="nofollow noopener noreferrer">
+              <span class="iconify" data-icon="lucide:chevron-left"></span> Prev
+            </a>
+            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-rand" href="#" target="_blank" rel="nofollow noopener noreferrer">
+              <span class="iconify" data-icon="lucide:dices"></span> Random
+            </a>
+            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-next" href="#" target="_blank" rel="nofollow noopener noreferrer">
+              Next <span class="iconify" data-icon="lucide:chevron-right"></span>
+            </a>
           </div>
 
           <div class="` + widgetId + `-credit">
-            Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
+            Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> <span class="iconify" data-icon="lucide:heart" style="color:` + accentColor + `;"></span>
           </div>
         </div>
 
+        <!-- BACK CARD FACE (DIRECTORY) -->
         <div class="` + widgetId + `-face ` + widgetId + `-back">
           ` + sparkleHTML + `
-          <div class="` + widgetId + `-back-title">🌸 Webring Directory</div>
+          <div class="` + widgetId + `-back-title">
+            <span class="iconify" data-icon="lucide:flower-2"></span> Webring Directory
+          </div>
           <div class="` + widgetId + `-table-wrapper">
             <table class="` + widgetId + `-table">
               <thead>
@@ -113,20 +150,20 @@
             </table>
           </div>
           <div class="` + widgetId + `-credit">
-            Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
+            Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> <span class="iconify" data-icon="lucide:heart" style="color:` + accentColor + `;"></span>
           </div>
         </div>
 
       </div>
     </div>
     <div class="` + widgetId + `-instruction" id="` + widgetId + `-flip-btn">
-      🔄 Click to flip card & view members list
+      <span class="iconify" data-icon="lucide:refresh-cw"></span> Click to flip card & view members list
     </div>
   `;
 
   currentScript.parentNode.insertBefore(container, currentScript);
 
-  // Flip Toggle Event
+  // Flip Card Action
   var cardElement = document.getElementById(widgetId + '-card');
   var flipBtn = document.getElementById(widgetId + '-flip-btn');
   var isFlipped = false;
@@ -135,10 +172,10 @@
     isFlipped = !isFlipped;
     if (isFlipped) {
       cardElement.className = widgetId + '-card flipped';
-      flipBtn.textContent = '🔄 Click to flip back to Profile ID';
+      flipBtn.innerHTML = '<span class="iconify" data-icon="lucide:refresh-cw"></span> Click to flip back to Profile ID';
     } else {
       cardElement.className = widgetId + '-card';
-      flipBtn.textContent = '🔄 Click to flip card & view members list';
+      flipBtn.innerHTML = '<span class="iconify" data-icon="lucide:refresh-cw"></span> Click to flip card & view members list';
     }
   });
 
@@ -162,20 +199,3 @@
 
         var prevIndex = (currentIndex - 1 + data.length) % data.length;
         var nextIndex = (currentIndex + 1) % data.length;
-        var randIndex = Math.floor(Math.random() * data.length);
-        if (data.length > 1 && randIndex === currentIndex) {
-          randIndex = (currentIndex + 1) % data.length;
-        }
-
-        document.getElementById(widgetId + '-prev').href = data[prevIndex].url;
-        document.getElementById(widgetId + '-next').href = data[nextIndex].url;
-        document.getElementById(widgetId + '-rand').href = data[randIndex].url;
-      } else {
-        tbody.innerHTML = '<tr><td colspan="2">No members found.</td></tr>';
-      }
-    })
-    .catch(function() {
-      var tbody = document.getElementById(widgetId + '-list');
-      tbody.innerHTML = '<tr><td colspan="2">Unable to load directory.</td></tr>';
-    });
-})();
