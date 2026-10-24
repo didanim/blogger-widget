@@ -16,7 +16,7 @@
   const sparkles = currentScript.getAttribute('sparkles') === 'true'; // Sparkle overlay option
 
   // URL to raw webring directory JSON on GitHub
-  const WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/kawaiiwebring.js';
+  const WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webring.json';
 
   // Create unique widget container ID
   const widgetId = 'kawaii-webring-' + Math.floor(Math.random() * 100000);
