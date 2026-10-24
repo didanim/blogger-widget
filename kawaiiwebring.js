@@ -231,7 +231,7 @@
             </div>
           </div>
           <div class="${widgetId}-bio">${bio}</div>
-          <a class="${widgetId}-bloglink" href="${bloglink}" target="_blank" rel="nofollow noopener noreferrer">🌐 ${bloglink.replace(/^https?:\/\//, '')}</a>
+          <a class="${widgetId}-bloglink" href="${bloglink}" target="_blank" rel="nofollow noopener noreferrer"> ${bloglink.replace(/^https?:\/\//, '')}</a>
           <div class="${widgetId}-credit">
             Made by <a href="https://writewhim.blogspot.com" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
           </div>
