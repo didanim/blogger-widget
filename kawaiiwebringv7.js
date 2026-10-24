@@ -32,7 +32,8 @@
   var accentColor = currentScript.getAttribute('accentColor') || '#ff6b81';
   var sparkles = currentScript.getAttribute('sparkles') === 'true';
 
-  var WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webRing.json';
+  // FIX: Added cache-buster (?t=...) so updates on GitHub show up immediately without jsDelivr delay
+  var WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webRing.json?t=' + new Date().getTime();
   var widgetId = 'kw-ring-' + Math.floor(Math.random() * 100000);
 
   var displayLink = bloglink.replace(/^https?:\/\//, '').replace(/\/$/, '');
@@ -189,16 +190,16 @@
   currentScript.parentNode.insertBefore(container, currentScript);
 
   var cardElement = document.getElementById(widgetId + '-card');
-  var flipBtn = document.getElementById(widgetId + '-flip-btn');
+  var flipBtn = document.getElementById(widgetId + `-flip-btn`);
   var isFlipped = false;
   
   flipBtn.addEventListener('click', function() {
     isFlipped = !isFlipped;
     if (isFlipped) {
-      cardElement.className = widgetId + '-card flipped';
+      cardElement.className = widgetId + `-card flipped`;
       flipBtn.innerHTML = '<span class="iconify" data-icon="lucide:refresh-cw"></span> Back to Profile ID';
     } else {
-      cardElement.className = widgetId + '-card';
+      cardElement.className = widgetId + `-card`;
       flipBtn.innerHTML = '<span class="iconify" data-icon="lucide:refresh-cw"></span> View members list';
     }
   });
@@ -212,7 +213,12 @@
       if (data && data.length > 0) {
         data.forEach(function(item) {
           var tr = document.createElement('tr');
-          tr.innerHTML = '<td><a href="' + item.url + '" target="_blank" rel="nofollow noopener noreferrer">' + item.name + '</a></td><td>' + item.niche + '</td>';
+          // FIX: Ensured link has a safe fallback and rel="nofollow noopener noreferrer" is strictly applied
+          var blogUrl = item.url ? item.url : '#';
+          var blogName = item.name ? item.name : 'Untitled Blog';
+          var blogNiche = item.niche ? item.niche : 'Personal';
+          
+          tr.innerHTML = '<td><a href="' + blogUrl + '" target="_blank" rel="nofollow noopener noreferrer">' + blogName + '</a></td><td>' + blogNiche + '</td>';
           tbody.appendChild(tr);
         });
       } else {
