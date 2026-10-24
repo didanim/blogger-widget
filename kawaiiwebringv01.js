@@ -199,3 +199,20 @@
 
         var prevIndex = (currentIndex - 1 + data.length) % data.length;
         var nextIndex = (currentIndex + 1) % data.length;
+        var randIndex = Math.floor(Math.random() * data.length);
+        if (data.length > 1 && randIndex === currentIndex) {
+          randIndex = (currentIndex + 1) % data.length;
+        }
+
+        document.getElementById(widgetId + '-prev').href = data[prevIndex].url;
+        document.getElementById(widgetId + '-next').href = data[nextIndex].url;
+        document.getElementById(widgetId + '-rand').href = data[randIndex].url;
+      } else {
+        tbody.innerHTML = '<tr><td colspan="2">No members found.</td></tr>';
+      }
+    })
+    .catch(function() {
+      var tbody = document.getElementById(widgetId + '-list');
+      tbody.innerHTML = '<tr><td colspan="2">Unable to load directory.</td></tr>';
+    });
+})();
