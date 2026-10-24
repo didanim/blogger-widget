@@ -2,6 +2,11 @@
   {
     "name": "WriteWhim",
     "url": "https://writewhim.blogspot.com",
-    "niche": "Personal Blog"
+    "niche": "Personal Blog, Tutorials"
+  },
+   {
+    "name": "Hungry Dev Blog",
+    "url": "https://crispypata.neocities.org",
+    "niche": "Blog, Web Developer"
   }
 ]
