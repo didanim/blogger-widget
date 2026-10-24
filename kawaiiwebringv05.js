@@ -14,15 +14,17 @@
 
   // Extract attributes safely with fallbacks
   var name = currentScript.getAttribute('name') || 'Anonymous';
-  var pronouns = currentScript.getAttribute('pronouns') || ''; // e.g., "she/her"
-  var status = currentScript.getAttribute('status') || ''; // e.g., "Blogging ☕"
-  var statusColor = currentScript.getAttribute('statusColor') || '#2ecc71'; // Green dot by default
+  var pronouns = currentScript.getAttribute('pronouns') || '';
+  var status = currentScript.getAttribute('status') || '';
+  var statusColor = currentScript.getAttribute('statusColor') || '#2ecc71';
   var avatar = currentScript.getAttribute('avatarImage') || 'https://via.placeholder.com/80/f8a5c2/ffffff?text=♥';
   var bio = currentScript.getAttribute('bio') || 'Welcome to my cozy blog corner!';
   var bloglink = currentScript.getAttribute('bloglink') || '#';
   var niche = currentScript.getAttribute('niche') || 'Personal Blog';
   var likes = currentScript.getAttribute('likes') || 'Cats, Coffee, Pixel Art';
   var dislikes = currentScript.getAttribute('dislikes') || 'Spam, Rainy Days';
+  
+  // Font & Style attributes
   var textFont = currentScript.getAttribute('textFont') || "'Palatino Linotype', 'Book Antiqua', Palatino, serif";
   var textSize = currentScript.getAttribute('textSize') || '13';
   var cardColor = currentScript.getAttribute('cardColor') || '#fff0f5';
@@ -40,7 +42,8 @@
     .` + widgetId + `-perspective { perspective: 1000px !important; height: 280px !important; width: 100% !important; }
     .` + widgetId + `-card { width: 100% !important; height: 100% !important; position: relative !important; transform-style: preserve-3d !important; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1) !important; border-radius: 16px !important; box-shadow: 0 8px 18px rgba(0,0,0,0.08) !important; }
     .` + widgetId + `-card.flipped { transform: rotateY(180deg) !important; }
-    .` + widgetId + `-face { position: absolute !important; width: 100% !important; height: 100% !important; backface-visibility: hidden !important; -webkit-backface-visibility: hidden !important; border-radius: 12px; border: 2px ` + borderStyle + ` ` + accentColor + ` !important; background-color: ` + cardColor + ` !important; box-sizing: border-box !important; padding: 12px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; top: 0 !important; left: 0 !important; }
+    
+    .` + widgetId + `-face { position: absolute !important; width: 100% !important; height: 100% !important; backface-visibility: hidden !important; -webkit-backface-visibility: hidden !important; border-radius: 12px !important; border: 2px ` + borderStyle + ` ` + accentColor + ` !important; background-color: ` + cardColor + ` !important; box-sizing: border-box !important; padding: 12px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; top: 0 !important; left: 0 !important; font-family: ` + textFont + ` !important; font-size: ` + textSize + `px !important; }
     
     @keyframes ` + widgetId + `-twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); } 50% { opacity: 0.9; transform: scale(1.2) rotate(180deg); } }
     .` + widgetId + `-sparkles { position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; pointer-events: none !important; z-index: 1 !important; }
@@ -62,13 +65,11 @@
     .` + widgetId + `-tags { display: flex !important; gap: 4px !important; align-items: center !important; margin-top: 3px !important; flex-wrap: wrap !important; }
     .` + widgetId + `-niche { display: inline-block !important; background: #ffffff !important; padding: 2px 7px !important; border-radius: 10px !important; font-size: 0.75em !important; color: #636e72 !important; border: 1px solid #dfe6e9 !important; }
     
-    /* Status Badge */
     .` + widgetId + `-status-pill { display: inline-flex !important; align-items: center !important; gap: 4px !important; background: rgba(255,255,255,0.9) !important; padding: 2px 7px !important; border-radius: 10px !important; font-size: 0.75em !important; color: #2d3436 !important; border: 1px solid #dfe6e9 !important; }
     .` + widgetId + `-status-dot { width: 6px !important; height: 6px !important; border-radius: 50% !important; background-color: ` + statusColor + ` !important; display: inline-block !important; }
 
     .` + widgetId + `-bio { margin: 4px 0 !important; font-size: 0.85em !important; line-height: 1.25 !important; color: #4a4a4a !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; z-index: 2 !important; }
     
-    /* Likes and Dislikes Section */
     .` + widgetId + `-likes-dislikes { display: flex !important; flex-direction: column !important; gap: 3px !important; background: rgba(255, 255, 255, 0.75) !important; border-radius: 8px !important; padding: 5px 8px !important; margin: 2px 0 !important; font-size: 0.78em !important; z-index: 2 !important; border: 1px solid rgba(0,0,0,0.04) !important; }
     .` + widgetId + `-item { display: flex !important; align-items: center !important; gap: 5px !important; }
     .` + widgetId + `-item-text { overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; color: #2d3436 !important; }
@@ -105,7 +106,6 @@
     </div>
   ` : '';
 
-  // Conditional formatting for optional fields
   var pronounsHTML = pronouns ? '<span class="' + widgetId + '-pronouns">' + pronouns + '</span>' : '';
   var statusHTML = status ? '<span class="' + widgetId + '-status-pill"><span class="' + widgetId + '-status-dot"></span>' + status + '</span>' : '';
 
@@ -135,7 +135,6 @@
           </div>
           <div class="` + widgetId + `-bio">` + bio + `</div>
           
-          <!-- LIKES AND DISLIKES SECTION -->
           <div class="` + widgetId + `-likes-dislikes">
             <div class="` + widgetId + `-item">
               <span class="iconify" data-icon="lucide:thumbs-up" style="color:` + accentColor + `; flex-shrink: 0;"></span>
@@ -189,7 +188,6 @@
 
   currentScript.parentNode.insertBefore(container, currentScript);
 
-  // Flip Card Action
   var cardElement = document.getElementById(widgetId + '-card');
   var flipBtn = document.getElementById(widgetId + '-flip-btn');
   var isFlipped = false;
