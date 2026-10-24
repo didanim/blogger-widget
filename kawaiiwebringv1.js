@@ -1,323 +1,125 @@
 (function () {
   // Read script attributes
-  const scripts = document.getElementsByTagName('script');
-  const currentScript = scripts[scripts.length - 1];
+  var scripts = document.getElementsByTagName('script');
+  var currentScript = scripts[scripts.length - 1];
 
-  // Config parameters with fallbacks
-  const name = currentScript.getAttribute('name') || 'Anonymous';
-  const avatar = currentScript.getAttribute('avatarImage') || 'https://via.placeholder.com/80/f8a5c2/ffffff?text=♥';
-  const bio = currentScript.getAttribute('bio') || 'Welcome to my cozy blog corner!';
-  const bloglink = currentScript.getAttribute('bloglink') || '#';
-  const niche = currentScript.getAttribute('niche') || 'Personal Blog';
-  const textFont = currentScript.getAttribute('textFont') || "'Palatino Linotype', 'Book Antiqua', Palatino, serif";
-  const textSize = currentScript.getAttribute('textSize') || '14';
-  const cardColor = currentScript.getAttribute('cardColor') || '#fff0f5'; // Light pastel pink
-  const accentColor = currentScript.getAttribute('accentColor') || '#ff6b81'; // Cute vibrant accent
-  const sparkles = currentScript.getAttribute('sparkles') === 'true'; // Sparkle toggle
+  var name = currentScript.getAttribute('name') || 'Anonymous';
+  var avatar = currentScript.getAttribute('avatarImage') || 'https://via.placeholder.com/80/f8a5c2/ffffff?text=♥';
+  var bio = currentScript.getAttribute('bio') || 'Welcome to my cozy blog corner!';
+  var bloglink = currentScript.getAttribute('bloglink') || '#';
+  var niche = currentScript.getAttribute('niche') || 'Personal Blog';
+  var textFont = currentScript.getAttribute('textFont') || "'Palatino Linotype', 'Book Antiqua', Palatino, serif";
+  var textSize = currentScript.getAttribute('textSize') || '14';
+  var cardColor = currentScript.getAttribute('cardColor') || '#fff0f5';
+  var accentColor = currentScript.getAttribute('accentColor') || '#ff6b81';
+  var sparkles = currentScript.getAttribute('sparkles') === 'true';
 
-  // URL to raw webring directory JSON on GitHub
-  const WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webring.json';
+  var WEBRING_JSON_URL = 'https://cdn.jsdelivr.net/gh/didanim/blogger-widget@refs/heads/main/webring.json';
+  var widgetId = 'kw-ring-' + Math.floor(Math.random() * 100000);
 
-  const widgetId = 'kawaii-webring-' + Math.floor(Math.random() * 100000);
+  // Inject CSS Styles
+  var css = `
+    .` + widgetId + `-container { width: 100% !important; max-width: 320px !important; margin: 15px auto !important; font-family: ` + textFont + ` !important; font-size: ` + textSize + `px !important; color: #2d3436 !important; box-sizing: border-box !important; }
+    .` + widgetId + `-perspective { perspective: 1000px !important; height: 260px !important; width: 100% !important; }
+    .` + widgetId + `-card { width: 100% !important; height: 100% !important; position: relative !important; transform-style: preserve-3d !important; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1) !important; border-radius: 16px !important; box-shadow: 0 8px 18px rgba(0,0,0,0.08) !important; }
+    .` + widgetId + `-card.flipped { transform: rotateY(180deg) !important; }
+    .` + widgetId + `-face { position: absolute !important; width: 100% !important; height: 100% !important; backface-visibility: hidden !important; -webkit-backface-visibility: hidden !important; border-radius: 16px !important; border: 2px dashed ` + accentColor + ` !important; background-color: ` + cardColor + ` !important; box-sizing: border-box !important; padding: 12px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; top: 0 !important; left: 0 !important; }
+    
+    @keyframes ` + widgetId + `-twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); } 50% { opacity: 0.9; transform: scale(1.2) rotate(180deg); } }
+    .` + widgetId + `-sparkles { position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; pointer-events: none !important; z-index: 1 !important; }
+    .` + widgetId + `-sparkle { position: absolute !important; color: ` + accentColor + ` !important; font-size: 12px !important; animation: ` + widgetId + `-twinkle 3s infinite ease-in-out !important; }
+    .` + widgetId + `-s1 { top: 8% !important; left: 8% !important; animation-delay: 0s !important; }
+    .` + widgetId + `-s2 { top: 12% !important; right: 10% !important; animation-delay: 0.7s !important; font-size: 16px !important; }
+    .` + widgetId + `-s3 { bottom: 25% !important; left: 10% !important; animation-delay: 1.4s !important; font-size: 14px !important; }
+    .` + widgetId + `-s4 { bottom: 18% !important; right: 12% !important; animation-delay: 2.1s !important; }
 
-  // Inject Styles dynamically
-  const style = document.createElement('style');
-  style.textContent = `
-    .#${widgetId}-container {
-      width: 100%;
-      max-width: 320px;
-      margin: 15px auto;
-      font-family: ${textFont};
-      font-size: ${textSize}px;
-      color: #2d3436;
-      box-sizing: border-box;
-    }
-    .#${widgetId}-perspective {
-      perspective: 1000px;
-      height: 250px;
-      width: 100%;
-    }
-    .#${widgetId}-card {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
-      border-radius: 16px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
-    }
-    .#${widgetId}-card.flipped {
-      transform: rotateY(180deg);
-    }
-    .#${widgetId}-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 16px;
-      border: 2px dashed ${accentColor};
-      background-color: ${cardColor};
-      box-sizing: border-box;
-      padding: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    /* Sparkle Particle Animations */
-    @keyframes ${widgetId}-twinkle {
-      0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
-      50% { opacity: 0.9; transform: scale(1.2) rotate(180deg); }
-    }
-    .#${widgetId}-sparkles {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      pointer-events: none;
-      z-index: 1;
-      overflow: hidden;
-    }
-    .#${widgetId}-sparkle {
-      position: absolute;
-      color: ${accentColor};
-      font-size: 12px;
-      animation: ${widgetId}-twinkle 3s infinite ease-in-out;
-    }
-    .#${widgetId}-s1 { top: 10%; left: 8%; animation-delay: 0s; }
-    .#${widgetId}-s2 { top: 15%; right: 10%; animation-delay: 0.7s; font-size: 16px; }
-    .#${widgetId}-s3 { bottom: 25%; left: 12%; animation-delay: 1.4s; font-size: 14px; }
-    .#${widgetId}-s4 { bottom: 15%; right: 12%; animation-delay: 2.1s; }
-
-    /* Front Card Layout */
-    .#${widgetId}-top-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      z-index: 2;
-    }
-    .#${widgetId}-avatar {
-      width: 65px;
-      height: 65px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #ffffff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      flex-shrink: 0;
-    }
-    .#${widgetId}-header-info {
-      flex-grow: 1;
-      overflow: hidden;
-    }
-    .#${widgetId}-name {
-      font-weight: bold;
-      font-size: 1.05em;
-      color: ${accentColor};
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin: 0 0 2px 0;
-    }
-    .#${widgetId}-niche {
-      display: inline-block;
-      background: #ffffff;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 0.78em;
-      color: #636e72;
-      border: 1px solid #dfe6e9;
-    }
-    .#${widgetId}-bio {
-      margin: 6px 0;
-      font-size: 0.85em;
-      line-height: 1.3;
-      color: #4a4a4a;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      z-index: 2;
-    }
-    .#${widgetId}-bloglink {
-      display: block;
-      font-size: 0.82em;
-      color: ${accentColor};
-      text-decoration: none;
-      font-weight: bold;
-      word-break: break-all;
-      z-index: 2;
-    }
-
-    /* Webring Quick Navigation Controls */
-    .#${widgetId}-nav-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 12px;
-      padding: 4px 8px;
-      margin-top: 4px;
-      border: 1px solid rgba(0,0,0,0.05);
-      z-index: 2;
-    }
-    .#${widgetId}-nav-btn {
-      color: ${accentColor};
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 0.8em;
-      padding: 2px 6px;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-    .#${widgetId}-nav-btn:hover {
-      background: ${accentColor};
-      color: #ffffff;
-    }
-
-    .#${widgetId}-credit {
-      text-align: center;
-      font-size: 0.75em;
-      color: #7f8c8d;
-      border-top: 1px dashed rgba(0,0,0,0.1);
-      padding-top: 4px;
-      margin-top: 4px;
-      z-index: 2;
-    }
-    .#${widgetId}-credit a {
-      color: ${accentColor};
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    /* Back Directory Layout */
-    .#${widgetId}-back {
-      transform: rotateY(180deg);
-      padding: 10px;
-    }
-    .#${widgetId}-back-title {
-      font-weight: bold;
-      text-align: center;
-      margin: 0 0 6px 0;
-      color: ${accentColor};
-      font-size: 0.9em;
-    }
-    .#${widgetId}-table-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 8px;
-      background: rgba(255,255,255,0.85);
-    }
-    .#${widgetId}-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8em;
-    }
-    .#${widgetId}-table th, .#${widgetId}-table td {
-      padding: 5px 8px;
-      text-align: left;
-      border-bottom: 1px solid #f1f2f6;
-    }
-    .#${widgetId}-table th {
-      background: ${accentColor};
-      color: #fff;
-      position: sticky;
-      top: 0;
-      z-index: 2;
-    }
-    .#${widgetId}-table a {
-      color: #2d3436;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .#${widgetId}-table a:hover {
-      color: ${accentColor};
-      text-decoration: underline;
-    }
-
-    /* Instruction Button */
-    .#${widgetId}-instruction {
-      text-align: center;
-      margin-top: 8px;
-      font-size: 0.8em;
-      color: ${accentColor};
-      cursor: pointer;
-      user-select: none;
-      font-weight: bold;
-      transition: transform 0.2s;
-    }
-    .#${widgetId}-instruction:hover {
-      transform: scale(1.02);
-    }
+    .` + widgetId + `-top-row { display: flex !important; gap: 12px !important; align-items: center !important; z-index: 2 !important; }
+    .` + widgetId + `-avatar { width: 60px !important; height: 60px !important; border-radius: 50% !important; object-fit: cover !important; border: 3px solid #ffffff !important; box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important; flex-shrink: 0 !important; }
+    .` + widgetId + `-header-info { flex-grow: 1 !important; overflow: hidden !important; }
+    .` + widgetId + `-name { font-weight: bold !important; font-size: 1.05em !important; color: ` + accentColor + ` !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; margin: 0 0 2px 0 !important; }
+    .` + widgetId + `-niche { display: inline-block !important; background: #ffffff !important; padding: 2px 8px !important; border-radius: 10px !important; font-size: 0.78em !important; color: #636e72 !important; border: 1px solid #dfe6e9 !important; }
+    .` + widgetId + `-bio { margin: 6px 0 !important; font-size: 0.85em !important; line-height: 1.3 !important; color: #4a4a4a !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; z-index: 2 !important; }
+    .` + widgetId + `-bloglink { display: block !important; font-size: 0.82em !important; color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; word-break: break-all !important; z-index: 2 !important; }
+    .` + widgetId + `-nav-controls { display: flex !important; justify-content: space-between !important; align-items: center !important; background: rgba(255, 255, 255, 0.7) !important; border-radius: 12px !important; padding: 4px 8px !important; margin-top: 4px !important; border: 1px solid rgba(0,0,0,0.05) !important; z-index: 2 !important; }
+    .` + widgetId + `-nav-btn { color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; font-size: 0.8em !important; padding: 2px 6px !important; border-radius: 6px !important; }
+    .` + widgetId + `-nav-btn:hover { background: ` + accentColor + ` !important; color: #ffffff !important; }
+    .` + widgetId + `-credit { text-align: center !important; font-size: 0.75em !important; color: #7f8c8d !important; border-top: 1px dashed rgba(0,0,0,0.1) !important; padding-top: 4px !important; margin-top: 4px !important; z-index: 2 !important; }
+    .` + widgetId + `-credit a { color: ` + accentColor + ` !important; text-decoration: none !important; font-weight: bold !important; }
+    
+    .` + widgetId + `-back { transform: rotateY(180deg) !important; padding: 10px !important; }
+    .` + widgetId + `-back-title { font-weight: bold !important; text-align: center !important; margin: 0 0 6px 0 !important; color: ` + accentColor + ` !important; font-size: 0.9em !important; }
+    .` + widgetId + `-table-wrapper { flex: 1 !important; overflow-y: auto !important; border: 1px solid rgba(0,0,0,0.08) !important; border-radius: 8px !important; background: rgba(255,255,255,0.85) !important; }
+    .` + widgetId + `-table { width: 100% !important; border-collapse: collapse !important; font-size: 0.8em !important; margin: 0 !important; }
+    .` + widgetId + `-table th, .` + widgetId + `-table td { padding: 5px 8px !important; text-align: left !important; border-bottom: 1px solid #f1f2f6 !important; }
+    .` + widgetId + `-table th { background: ` + accentColor + ` !important; color: #fff !important; position: sticky !important; top: 0 !important; z-index: 2 !important; }
+    .` + widgetId + `-table a { color: #2d3436 !important; text-decoration: none !important; font-weight: bold !important; }
+    .` + widgetId + `-instruction { text-align: center !important; margin-top: 8px !important; font-size: 0.8em !important; color: ` + accentColor + ` !important; cursor: pointer !important; user-select: none !important; font-weight: bold !important; }
   `;
-  document.head.appendChild(style);
 
-  // Sparkle HTML Template
-  const sparkleHTML = sparkles ? `
-    <div class="${widgetId}-sparkles">
-      <span class="${widgetId}-sparkle ${widgetId}-s1">✦</span>
-      <span class="${widgetId}-sparkle ${widgetId}-s2">✨</span>
-      <span class="${widgetId}-sparkle ${widgetId}-s3">💖</span>
-      <span class="${widgetId}-sparkle ${widgetId}-s4">✦</span>
-    </div>
-  ` : '';
+  var style = document.createElement('style');
+  style.type = 'text/css';
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+  document.getElementsByTagName('head')[0].appendChild(style);
 
-  // Build Container HTML
-  const container = document.createElement('div');
-  container.className = `${widgetId}-container`;
+  var sparkleHTML = sparkles ? '<div class="' + widgetId + '-sparkles"><span class="' + widgetId + '-sparkle ' + widgetId + '-s1">✦</span><span class="' + widgetId + '-sparkle ' + widgetId + '-s2">✨</span><span class="' + widgetId + '-sparkle ' + widgetId + '-s3">💖</span><span class="' + widgetId + '-sparkle ' + widgetId + '-s4">✦</span></div>' : '';
+
+  var container = document.createElement('div');
+  container.className = widgetId + '-container';
   container.innerHTML = `
-    <div class="${widgetId}-perspective">
-      <div class="${widgetId}-card" id="${widgetId}-card">
+    <div class="` + widgetId + `-perspective">
+      <div class="` + widgetId + `-card" id="` + widgetId + `-card">
         
-        <!-- FRONT SIDE -->
-        <div class="${widgetId}-face">
-          ${sparkleHTML}
-          <div class="${widgetId}-top-row">
-            <img class="${widgetId}-avatar" src="${avatar}" alt="${name}'s Avatar" />
-            <div class="${widgetId}-header-info">
-              <div class="${widgetId}-name">${name}</div>
-              <span class="${widgetId}-niche">${niche}</span>
+        <div class="` + widgetId + `-face">
+          ` + sparkleHTML + `
+          <div class="` + widgetId + `-top-row">
+            <img class="` + widgetId + `-avatar" src="` + avatar + `" alt="Avatar" />
+            <div class="` + widgetId + `-header-info">
+              <div class="` + widgetId + `-name">` + name + `</div>
+              <span class="` + widgetId + `-niche">` + niche + `</span>
             </div>
           </div>
-          <div class="${widgetId}-bio">${bio}</div>
-          <a class="${widgetId}-bloglink" href="${bloglink}" target="_blank" rel="nofollow noopener noreferrer">🌐 ${bloglink.replace(/^https?:\/\//, '')}</a>
+          <div class="` + widgetId + `-bio">` + bio + `</div>
+          <a class="` + widgetId + `-bloglink" href="` + bloglink + `" target="_blank" rel="nofollow noopener noreferrer">🌐 ` + bloglink.replace(/^https?:\/\//, '') + `</a>
           
-          <!-- Prev / Random / Next Quick Controls -->
-          <div class="${widgetId}-nav-controls">
-            <a class="${widgetId}-nav-btn" id="${widgetId}-prev" href="#" target="_blank" rel="nofollow noopener noreferrer">◀ Prev</a>
-            <a class="${widgetId}-nav-btn" id="${widgetId}-rand" href="#" target="_blank" rel="nofollow noopener noreferrer">🎲 Random</a>
-            <a class="${widgetId}-nav-btn" id="${widgetId}-next" href="#" target="_blank" rel="nofollow noopener noreferrer">Next ▶</a>
+          <div class="` + widgetId + `-nav-controls">
+            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-prev" href="#" target="_blank" rel="nofollow noopener noreferrer">◀ Prev</a>
+            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-rand" href="#" target="_blank" rel="nofollow noopener noreferrer">🎲 Random</a>
+            <a class="` + widgetId + `-nav-btn" id="` + widgetId + `-next" href="#" target="_blank" rel="nofollow noopener noreferrer">Next ▶</a>
           </div>
 
-          <div class="${widgetId}-credit">
+          <div class="` + widgetId + `-credit">
             Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
           </div>
         </div>
 
-        <!-- BACK SIDE (Directory Table) -->
-        <div class="${widgetId}-face ${widgetId}-back">
-          ${sparkleHTML}
-          <div class="${widgetId}-back-title">🌸 Webring Directory</div>
-          <div class="${widgetId}-table-wrapper">
-            <table class="${widgetId}-table">
+        <div class="` + widgetId + `-face ` + widgetId + `-back">
+          ` + sparkleHTML + `
+          <div class="` + widgetId + `-back-title">🌸 Webring Directory</div>
+          <div class="` + widgetId + `-table-wrapper">
+            <table class="` + widgetId + `-table">
               <thead>
                 <tr>
                   <th>Blog Name</th>
                   <th>Niche</th>
                 </tr>
               </thead>
-              <tbody id="${widgetId}-list">
+              <tbody id="` + widgetId + `-list">
                 <tr><td colspan="2" style="text-align:center;">Loading directory...</td></tr>
               </tbody>
             </table>
           </div>
-          <div class="${widgetId}-credit">
+          <div class="` + widgetId + `-credit">
             Made by <a href="https://itsdida.neocities.org" target="_blank" rel="nofollow noopener noreferrer">Dida</a> ♡
           </div>
         </div>
 
       </div>
     </div>
-    <div class="${widgetId}-instruction" id="${widgetId}-flip-btn">
+    <div class="` + widgetId + `-instruction" id="` + widgetId + `-flip-btn">
       🔄 Click to flip card & view members list
     </div>
   `;
@@ -325,65 +127,55 @@
   currentScript.parentNode.insertBefore(container, currentScript);
 
   // Flip Toggle Event
-  const cardElement = document.getElementById(`${widgetId}-card`);
-  const flipBtn = document.getElementById(`${widgetId}-flip-btn`);
+  var cardElement = document.getElementById(widgetId + '-card');
+  var flipBtn = document.getElementById(widgetId + '-flip-btn');
+  var isFlipped = false;
   
-  let isFlipped = false;
-  flipBtn.addEventListener('click', () => {
+  flipBtn.addEventListener('click', function() {
     isFlipped = !isFlipped;
     if (isFlipped) {
-      cardElement.classList.add('flipped');
+      cardElement.className = widgetId + '-card flipped';
       flipBtn.textContent = '🔄 Click to flip back to Profile ID';
     } else {
-      cardElement.classList.remove('flipped');
+      cardElement.className = widgetId + '-card';
       flipBtn.textContent = '🔄 Click to flip card & view members list';
     }
   });
 
-  // Fetch Member Directory and Bind Prev/Next Logic
+  // Fetch Member Directory
   fetch(WEBRING_JSON_URL)
-    .then(res => res.json())
-    .then(data => {
-      const tbody = document.getElementById(`${widgetId}-list`);
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      var tbody = document.getElementById(widgetId + '-list');
       tbody.innerHTML = '';
       
       if (data && data.length > 0) {
-        // Populate Table
-        data.forEach(item => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><a href="${item.url}" target="_blank" rel="nofollow noopener noreferrer">${item.name}</a></td>
-            <td>${item.niche}</td>
-          `;
+        data.forEach(function(item) {
+          var tr = document.createElement('tr');
+          tr.innerHTML = '<td><a href="' + item.url + '" target="_blank" rel="nofollow noopener noreferrer">' + item.name + '</a></td><td>' + item.niche + '</td>';
           tbody.appendChild(tr);
         });
 
-        // Determine current site position in index
-        const currentCleanUrl = bloglink.replace(/\/$/, '').toLowerCase();
-        let currentIndex = data.findIndex(item => item.url.replace(/\/$/, '').toLowerCase() === currentCleanUrl);
+        var currentCleanUrl = bloglink.replace(/\/$/, '').toLowerCase();
+        var currentIndex = data.findIndex(function(item) { return item.url.replace(/\/$/, '').toLowerCase() === currentCleanUrl; });
         if (currentIndex === -1) currentIndex = 0;
 
-        // Calculate Prev / Next circular indices
-        const prevIndex = (currentIndex - 1 + data.length) % data.length;
-        const nextIndex = (currentIndex + 1) % data.length;
-        
-        // Random Index (excluding current if possible)
-        let randIndex = Math.floor(Math.random() * data.length);
+        var prevIndex = (currentIndex - 1 + data.length) % data.length;
+        var nextIndex = (currentIndex + 1) % data.length;
+        var randIndex = Math.floor(Math.random() * data.length);
         if (data.length > 1 && randIndex === currentIndex) {
           randIndex = (currentIndex + 1) % data.length;
         }
 
-        // Set Navigation Links
-        document.getElementById(`${widgetId}-prev`).href = data[prevIndex].url;
-        document.getElementById(`${widgetId}-next`).href = data[nextIndex].url;
-        document.getElementById(`${widgetId}-rand`).href = data[randIndex].url;
-
+        document.getElementById(widgetId + '-prev').href = data[prevIndex].url;
+        document.getElementById(widgetId + '-next').href = data[nextIndex].url;
+        document.getElementById(widgetId + '-rand').href = data[randIndex].url;
       } else {
         tbody.innerHTML = '<tr><td colspan="2">No members found.</td></tr>';
       }
     })
-    .catch(() => {
-      const tbody = document.getElementById(`${widgetId}-list`);
+    .catch(function() {
+      var tbody = document.getElementById(widgetId + '-list');
       tbody.innerHTML = '<tr><td colspan="2">Unable to load directory.</td></tr>';
     });
 })();
